@@ -103,6 +103,9 @@ services:
 networks:
     sail:
         driver: bridge
+        ipam:
+            config:
+            - subnet: 172.24.0.7/16
 
 volumes:
     sail-mysql:
