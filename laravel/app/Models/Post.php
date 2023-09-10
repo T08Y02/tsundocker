@@ -12,5 +12,6 @@ class Post extends Model
         'title',
         'body', 
         'progress', 
+        'img_url',
     ];
 }

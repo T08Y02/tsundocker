@@ -24,6 +24,7 @@ class PostFactory extends Factory
             'title' => fake()->word,
             'body' => fake()->text($maxNbChars = 6),
             'progress' => rand(0, 100),
+            'img_url' => null,
         ];
     }
 }
