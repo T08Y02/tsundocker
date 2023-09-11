@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Cloudinary;
+use Illuminate\Support\Facades\Log;
 
 class PostController extends Controller
 {
@@ -16,7 +18,10 @@ class PostController extends Controller
     }
 
     public function create(Post $post, Request $request){
-        $input = $request["data"];
+        //Log::debug($request);
+        $image_url = Cloudinary::upload($request["image"]->getRealPath())->getSecurePath();
+        $input = ["title" => $request["title"], "body" => $request["body"]];
+        $input["img_url"] = $image_url;
         $post->fill($input)->save();
         return response()->json($post->id);
     }
