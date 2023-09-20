@@ -18,7 +18,7 @@ class PostController extends Controller
     }
 
     public function create(Post $post, Request $request){
-        //Log::debug($request);
+        Log::debug($request);
         $image_url = Cloudinary::upload($request["image"]->getRealPath())->getSecurePath();
         $input = ["title" => $request["title"], "body" => $request["body"]];
         $input["img_url"] = $image_url;
