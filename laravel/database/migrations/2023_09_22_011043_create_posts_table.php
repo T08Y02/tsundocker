@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('body', 200);
             $table->integer('progress')->unsigned()->default(0);
             $table->string('img_url')->nullable()->default("https://res.cloudinary.com/diwpdgc8g/image/upload/v1694399474/i76ia8xrwwn9hku6rg84.png");
+            $table->foreignId('customuser_id')->constrained();
             $table->softDeletes();
         });
     }

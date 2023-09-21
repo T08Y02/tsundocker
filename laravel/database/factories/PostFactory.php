@@ -34,6 +34,7 @@ class PostFactory extends Factory
             'body' => fake()->text($maxNbChars = 6),
             'progress' => rand(0, 100),
             'img_url' => fake()->randomElement($images),
+            'customuser_id' => '1', 
         ];
     }
 }
