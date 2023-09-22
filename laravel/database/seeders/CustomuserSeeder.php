@@ -15,6 +15,7 @@ class CustomuserSeeder extends Seeder
     {
         Customuser::create([
             'sub' => 'defaultuser',
+            'uuid' => '73d7a936-245f-4bec-b082-0941422698a1',
         ]);
     }
 }

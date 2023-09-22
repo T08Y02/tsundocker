@@ -14,6 +14,7 @@ class Post extends Model
         'progress', 
         'img_url',
         'customuser_id',
+        'creator_uuid', 
     ];
 
     public function customuser()

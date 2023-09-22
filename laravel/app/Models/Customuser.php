@@ -12,5 +12,6 @@ class Customuser extends Model
     protected $fillable = [
         'sub',
         'nickname',
+        'uuid', 
     ];
 }

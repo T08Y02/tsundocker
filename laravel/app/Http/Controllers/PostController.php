@@ -15,10 +15,13 @@ class PostController extends Controller
         return response()->json($post->get()->all());
     }
 
-    public function show(Post $post){
-        return response()->json($post);
+    public function show(Post $post, Customuser $customuser){
+        $customuser = $post->customuser()->first();
+        return ["creator_uuid"=>$customuser->uuid,"post"=>$post];
+        //return response()->json($post);
     }
 
+    //ユーザが存在しない場合、新たにユーザを作成する
     public function create(Post $post, Request $request, Customuser $customuser){
         Log::debug($request->auth0_user_id);
 
@@ -28,7 +31,7 @@ class PostController extends Controller
         if ($login_customuser === null){
             //Log::debug("isnull");
             $random_nickname = Str::random(10);
-            $customuser->fill(['sub' => $request->auth0_user_id, "nickname" => $random_nickname])->save();
+            $customuser->fill(['sub' => $request->auth0_user_id, "nickname" => $random_nickname, 'uuid' => Str::uuid(), ])->save();
             $input["customuser_id"] = $customuser->id;
         }
         else{

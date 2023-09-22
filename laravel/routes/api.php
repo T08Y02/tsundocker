@@ -18,7 +18,7 @@ use App\Http\Controllers\CustomuserController;
 
 //customuser
 Route::post('/getLoginCustomuser', [CustomuserController::class, 'getLoginCustomuser'])->middleware("auth0_id");
-Route::post('/id2Nickname', [CustomuserController::class, 'id2Nickname']);
+Route::post('/uuid2Nickname', [CustomuserController::class, 'uuid2Nickname']);
 
 //post
 Route::get('/posts', [PostController::class, 'index']);

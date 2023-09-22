@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('customusers', function (Blueprint $table) {
             $table->id();
+            $table->uuid("uuid");
             $table->string("sub");
             $table->string("nickname")->default("anonymous0");
             $table->timestamps();
