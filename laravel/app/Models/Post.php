@@ -13,5 +13,12 @@ class Post extends Model
         'body', 
         'progress', 
         'img_url',
+        'customuser_id',
+        'creator_uuid', 
     ];
+
+    public function customuser()
+    {
+        return $this->belongsTo(Customuser::class);
+    }
 }
