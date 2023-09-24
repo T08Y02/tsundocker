@@ -4,7 +4,7 @@ import axios from "axios"
 import { useRouter } from "next/router";
 import {Link, Input, Button, Textarea} from '@nextui-org/react'
 import { useAuth0 } from "@auth0/auth0-react";
-
+import Layout from '../../../components/Layout';
 
 
 function Create() {
@@ -18,82 +18,93 @@ function Create() {
     const {getAccessTokenSilently, isAuthenticated} = useAuth0();
 
     const onSubmit = async data => {
-        //そもそもリクエストが届いていないっぽい。アドレスが悪いわけではない(稼働しているはずのindexも死んでいた)
-        //const res = await axios.get('http://localhost/api/posts/create');
-        const formData = new FormData();
-        formData.append("title", data.title);
-        formData.append("body", data.body);
-        formData.append("image", data.image[0]);
-        const token = await getAccessTokenSilently({
-          authorizationParams: {
-          audience: `https://dev-48dl2vm3b3mgcs87.us.auth0.com/api/v2/`,
-        },
-      });
-        for (let value of formData.entries()) { 
-          console.log(value); 
-        }
-        console.log("token:", token); 
-        const res = await fetch('http://localhost/api/posts/create', {
-            method: 'POST',
-            mode: 'cors',
-          
-            headers: {
-              Authorization: "Bearer " + token
-              //'Content-Type': 'application/json'
-              //'Content-Type': formData
+        const result = window.confirm('投稿を作成しますか？');
+        if(result){
+          const formData = new FormData();
+          formData.append("title", data.title);
+          formData.append("body", data.body);
+          formData.append("image", data.image[0]);
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+            audience: `https://dev-48dl2vm3b3mgcs87.us.auth0.com/api/v2/`,
             },
+          });
+          for (let value of formData.entries()) { 
+            console.log(value); 
+          }
+          const res = await fetch('http://localhost/api/posts/create', {
+              method: 'POST',
+              mode: 'cors',
             
-            //body: JSON.stringify({ data }),
-            body : formData, 
+              headers: {
+                Authorization: "Bearer " + token
+                //'Content-Type': 'application/json'
+                //'Content-Type': formData
+              },
+              
+              //body: JSON.stringify({ data }),
+              body : formData, 
           })
-  
-        
-        //console.log(res);
-        const post_id = await res.json(); 
-        //console.log(post_id);
-               
-        alert(`投稿を${post_id}番の投稿として保存しました`);
-        await router.push('/posts');
+    
+          
+          //console.log(res);
+          const post_id = await res.json(); 
+          //console.log(post_id);
+                 
+          alert(`投稿を${post_id}番の投稿として保存しました`);
+          await router.push('/posts');
+
+         
+          await router.push('/posts');
+        }
+
+        else{
+          alert('投稿を編集しませんでした');
+        }
 
       }
 
       return (
         /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
-        <div className="p-10 w-9/12">
-          <form onSubmit={handleSubmit(onSubmit)} encType='multipart/form-data'>
-              <div className = 'p-5 w-1/2'>
-                  <label htmlFor="first">Title:</label>
-                  <Input type="text" size={`lg`} color="primary" isRequired defaultValue="" {...register("title")} />
-              </div>
-            
-              <div className = 'p-5'>
-                  <label htmlFor="last">Body:</label>
-                  <Textarea type="textarea" size={`lg`} clearButton color="primary" isRequired defaultValue="" {...register("body")}/>
-              </div>
-              <div>
-                <Input
-                color="primary"
-                type="file"
-                accept="image/*"
-                {...register("image")}/>
-              </div>
+        <Layout>
+          <div className="p-10">
+            <div className="ml-10 p-10 w-1/2 bg-slate-400 rounded-lg">
+            <form onSubmit={handleSubmit(onSubmit)} encType='multipart/form-data'>
+                <div className = 'p-5 w-1/2'>
+                    <label htmlFor="first">Title:</label>
+                    <Input type="text" size={`lg`} isRequired defaultValue="" color="primary" {...register("title")} />
+                </div>
+              
+                <div className = 'p-5'>
+                    <label htmlFor="last">Body:</label>
+                    <Textarea type="textarea" size={`lg`} clearButton color="primary" isRequired defaultValue="" {...register("body")}/>
+                </div>
+                <div  className = 'p-5'>
+                  <Input
+                  color="primary"
+                  type="file"
+                  accept="image/*"
+                  {...register("image")}/>
+                </div>
 
 
-            
-              <div className = 'input_submit pt-5 pb-5'>
-                  <Button type="submit" color="primary" variant="solid">
-                    投稿
-                  </Button>
-              </div>
-              <div className="pt-5 pb-5">
-                <div className = 'back'>
-                    <Button href="/posts" as={Link} color="primary" variant="faded">
-                      戻る
+              
+                <div className = 'input_submit p-5'>
+                    <Button type="submit" size='lg' color="primary" variant="solid">
+                      投稿
                     </Button>
                 </div>
-              </div>
-          </form>
-        </div>
+                <div className="p-5">
+                  <div className = 'back'>
+                      <Button href="/posts" as={Link} color="primary" variant="faded">
+                        戻る
+                      </Button>
+                  </div>
+                </div>
+            </form>
+            </div>
+          </div>
+        </Layout>
     )
 }
 
