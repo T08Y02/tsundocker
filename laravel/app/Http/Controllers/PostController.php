@@ -23,7 +23,6 @@ class PostController extends Controller
 
     //ユーザが存在しない場合、新たにユーザを作成する
     public function create(Post $post, Request $request, Customuser $customuser){
-        Log::debug($request->auth0_user_id);
 
         $login_customuser = Customuser::where('sub', '=', $request->auth0_user_id)->first();
         $input = ["title" => $request["title"], "body" => $request["body"]];
@@ -47,14 +46,36 @@ class PostController extends Controller
         return response()->json($post->id);
     }
 
-    public function edit(Post $post, Request $request){
-        $input = $request["data"];
-        $post->fill($input)->save();
-        return response()->json($post->id);
+    public function edit(Post $post, Request $request, Customuser $creator){
+        $creator = $post->customuser()->first();
+        $login_customuser = Customuser::where('sub', '=', $request->auth0_user_id)->first();
+        if ($creator->sub == $login_customuser->sub){
+            $input = ["title" => $request["title"], "body" => $request["body"]];
+            if ($request["image"]!== 'undefined'){
+                $image_url = Cloudinary::upload($request["image"]->getRealPath())->getSecurePath();
+                $input["img_url"] = $image_url;
+            }
+            
+            $post->fill($input)->save();
+            return response()->json($post->id);
+        }
+        else{
+            Log::debug("invalid delete detected.");
+            return ["edit -- permission denied."];
+        }
     }
 
-    public function delete(Post $post){
-        $post->delete();
-        return;
+    public function delete(Post $post, Request $request, Customuser $creator){
+        $creator = $post->customuser()->first();
+        $login_customuser = Customuser::where('sub', '=', $request->auth0_user_id)->first();
+        if ($creator->sub == $login_customuser->sub){
+            $post->delete();
+            return("success");
+        }
+        else{
+            Log::debug("invalid delete detected.");
+            return ("delete -- permission denied.");
+        }
+        
     }
 }

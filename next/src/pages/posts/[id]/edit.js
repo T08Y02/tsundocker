@@ -1,8 +1,10 @@
-import Link from 'next/link'
 import {useForm} from 'react-hook-form'
 import axios from "axios"
 import { useRouter } from "next/router";
 import { useState } from 'react';
+import {Link, Input, Button, Textarea} from '@nextui-org/react'
+import { useAuth0 } from "@auth0/auth0-react";
+import Layout from '../../../../components/Layout';
 
 function Edit({ post_and_uuid }){
     const post = post_and_uuid.post;
@@ -14,6 +16,7 @@ function Edit({ post_and_uuid }){
         formState: { errors },
       } = useForm();
     const router = useRouter();
+    const {getAccessTokenSilently, isAuthenticated} = useAuth0();
     const [progress, setProgress] = useState({
         percentage: post.progress
     });
@@ -26,42 +29,92 @@ function Edit({ post_and_uuid }){
     
 
     const onSubmit = async data => {
-        console.log(data);
-        
-        //そもそもリクエストが届いていないっぽい。アドレスが悪いわけではない(稼働しているはずのindexも死んでいた)
-        //const res = await axios.get('http://localhost/api/posts/create');
-        const res = await fetch(`http://localhost/api/posts/${post.id}/edit`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
+      const result = window.confirm('投稿を編集しますか？');
+        if(result){
+          const formData = new FormData();
+          formData.append("title", data.title);
+          formData.append("body", data.body);
+          formData.append("image", data.image[0]);
+          formData.append("progress", data.progress);
+
+          //PUTメソッドを利用する
+          formData.append('_method', 'put');
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+            audience: `https://dev-48dl2vm3b3mgcs87.us.auth0.com/api/v2/`,
             },
-            body: JSON.stringify({ data }),
+          });
+          for (let value of formData.entries()) { 
+            console.log(value); 
+          }
+          console.log("token:", token); 
+          const res = await fetch(`http://localhost/api/posts/${post.id}/edit`, {
+          //実質的にはPUTなのだが、PUTだとbodyが送れないのでここの記載はPOSTにしている。
+          //formdataの_methodをPUTにしておけばPUTリクエストが送信できているらしく、api側のルーティングもPUTで処理できている
+              method: 'POST',
+              mode: 'cors',
+            
+              headers: {
+                Authorization: "Bearer " + token
+                //'Content-Type': 'application/json'
+                //'Content-Type': formData
+              },
+              
+              //body: JSON.stringify({ data }),
+              body : formData, 
           })
-        const post_id = await res.json();
-        alert(`投稿を${post_id}番の投稿として保存しました`);
-        await router.push(`/posts/create`);
-        await router.push('/posts');
+
+          const post_id = await res.json();
+          alert(`投稿を${post_id}番の投稿として編集しました`);
+          await router.push(`/posts/create`);
+          await router.push('/posts');
 
       }
+    }
 
       return (
-        /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
-        <form onSubmit={handleSubmit(onSubmit)}>
-             <div className = 'input_title'>
-                <label htmlFor="first">Title:</label>
-                <input defaultValue={post.title} {...register("title")} />
+        <Layout>
+          <div className="p-10">
+            <div className="ml-10 p-10 w-1/2 bg-slate-400 rounded-lg">
+            <form onSubmit={handleSubmit(onSubmit)} encType='multipart/form-data'>
+                <div className = 'p-5 w-1/2'>
+                    <label htmlFor="first">Title:</label>
+                    <Input type="text" size={`lg`} color="primary" isRequired defaultValue={post.title} {...register("title")} />
+                </div>
+              
+                <div className = 'p-5'>
+                    <label htmlFor="last">Body:</label>
+                    <Textarea type="textarea" size={`lg`} clearButton color="primary" isRequired defaultValue={post.body} {...register("body")}/>
+                </div>
+                <div className = 'p-5'>
+                  <output id="output1">{progress.percentage}</output>
+                  <Input type="range"  value={progress.percentage} name="progress" min="0" max="100" step="1"  onInput={(e) => changeProgress(e)} {...register("progress")} />
+                </div>
+                <div className = 'p-5'>
+                  <Input
+                  color="primary"
+                  type="file"
+                  accept="image/*"
+                  {...register("image")}/>
+                </div>
+              
+                <div className = 'input_submit p-5'>
+                    <Button type="submit" color="primary" variant="solid" size='lg'>
+                      投稿編集
+                    </Button>
+                </div>
+                <div className="p-5">
+                  <div className = 'back'>
+                      <Button href="/posts" as={Link} color="primary" variant="faded">
+                        戻る
+                      </Button>
+                  </div>
+                </div>
+            </form>
             </div>
-           
-            <div className = 'input_body'>
-                <label htmlFor="last">Body:</label>
-                <input defaultValue={post.body} {...register("body")} />
-            </div>
-            <input type="range"  value={progress.percentage} name="progress" min="0" max="100" step="1"  onInput={(e) => changeProgress(e)} {...register("progress")} />
-            <output id="output1">{progress.percentage}</output>
-            <div className = 'input_submit'>
-                <input type="submit"/>
-            </div>
-        </form>
+          </div>
+        </Layout>
+
     )
 }
 

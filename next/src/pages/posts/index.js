@@ -2,6 +2,7 @@ import {Link, Button, Card, CardHeader, CardBody, CardFooter, Divider, Progress,
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import React, { useEffect, useState } from "react";
 import {useAuth0} from "@auth0/auth0-react";
+import Layout from '../../../components/Layout';
 
 // この関数はビルド時に呼ばれる
 export async function getStaticProps() {
@@ -14,7 +15,7 @@ export async function getStaticProps() {
     // `posts`をpropとして受け取れる
     return {
       props: {
-        posts
+        posts,
       },
     }
   }
@@ -23,9 +24,9 @@ export async function getStaticProps() {
   export default withPageAuthRequired(function Posts({ posts }) {
   const { user, error, isLoading } = useUser();
   const {getAccessTokenSilently, isAuthenticated} = useAuth0();
-  const [customuserNickname, setCustomuserNickname] = useState("username loading...");
+  const [loginUserNickname, setLoginUserNickname] = useState("username loading...");
 
-  const getCustomuser = async () => {
+  const getLoginuser = async () => {
     const token = await getAccessTokenSilently({
       authorizationParams: {
       audience: `https://dev-48dl2vm3b3mgcs87.us.auth0.com/api/v2/`,
@@ -48,58 +49,60 @@ export async function getStaticProps() {
     const customuser = await customuser_res.json();
     //console.log(customuser['nickname']);
     if (typeof customuser['nickname'] !== "undefined"){
-      setCustomuserNickname(customuser['nickname']);
+      setLoginUserNickname(customuser['nickname']);
     }
     else{
-      setCustomuserNickname(customuser);
+      setLoginUserNickname(customuser);
     }
 
     
     //console.log(customuserNickname);
   }
 
-  getCustomuser();
+  getLoginuser();
 
   return(
     user && (
-      <div className="p-10">
-        <div>
-          <p>{customuserNickname}</p>
-          <p>{user.email}</p>
-        </div>
-        <div className="pb-10">
-          <Button href="/posts/create" as={Link} color="primary"  variant="solid">
-          新規投稿を作成
-          </Button>
-        </div>
-        <div className="gap-6 grid grid-cols-2 sm:grid-cols-4">
-        {posts.map((post) => (
-          <div key={post.id}>
-            
-              <Card shadow="sm" isPressable className="w-full h-[200px]" >
-                <Divider/>
-                  <CardHeader className="overflow-visible p-0 ">
-                  <Image
-                    alt="Card background"
-                    className="object-cover rounded-xl h-[150px]"
-                    src={post.img_url}
-                    width={270}
-                    />
-                  </CardHeader>
-                <Divider/>
-                <CardBody className="overflow-visible p-0 ">
-                    <Link href={`/posts/${encodeURIComponent(post.id)}`}>
-                      {post.title}
-                    </Link>
-                </CardBody>
-                <Divider/>
-                <CardFooter>
-                  <Progress max='100' min='0' value = {post.progress}></Progress>
-                </CardFooter>
-              </Card>
+      <div>
+        <Layout>
+            <div className="mt-5 mb-5">
+              <p>{loginUserNickname} でログインしています</p>
+              <p>{user.email}</p>
             </div>
-        ))}
-        </div>
+            <div className="pb-10">
+              <Button href="/posts/create" as={Link} color="primary"  variant="solid">
+              新規投稿を作成
+              </Button>
+            </div>
+            <div className="gap-6 grid grid-cols-2 sm:grid-cols-4">
+            {posts.map((post) => (
+              <div key={post.id}>
+                
+                  <Card shadow="sm" isPressable className="w-full h-[200px]" >
+                    <Divider/>
+                      <CardHeader className="overflow-visible p-0 ">
+                      <Image
+                        alt="Card background"
+                        className="object-cover rounded-xl h-[150px]"
+                        src={post.img_url}
+                        width={270}
+                        />
+                      </CardHeader>
+                    <Divider/>
+                    <CardBody className="overflow-visible p-0 ">
+                        <Link href={`/posts/${encodeURIComponent(post.id)}`}>
+                          {post.title}
+                        </Link>
+                    </CardBody>
+                    <Divider/>
+                    <CardFooter>
+                      <Progress max='100' min='0' value = {post.progress}></Progress>
+                    </CardFooter>
+                  </Card>
+                </div>
+            ))}
+            </div>
+        </Layout>
       </div>
     )
   )
