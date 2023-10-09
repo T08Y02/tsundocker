@@ -9,8 +9,9 @@ use Illuminate\Support\Facades\Log;
 class CustomuserController extends Controller
 {
     public function getAllCustomuserUuid(Customuser $customuser){
-        //return response()->json($customuser->get(['uuid'])->all());
-        return response()->json($customuser->get()->all());
+        //Log::debug($customuser->get(['uuid']));
+        return response()->json($customuser->get(['uuid']));
+        //return response()->json($customuser->get()->all());
     }
 
     public function getLoginCustomuser(Request $request, Customuser $customuser){

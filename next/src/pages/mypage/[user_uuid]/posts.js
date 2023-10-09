@@ -26,7 +26,7 @@ export async function getStaticProps({ params }) {
   //todo : user_subを全取得してレンダリングする必要あり
 export async function getStaticPaths() {
   // 記事を取得する外部APIのエンドポイントをコール
-  const res = await fetch(`http://172.24.0.7/api/customUsers`);
+  const res = await fetch(`http://172.24.0.7/api/customUserUuids`);
   //const costomUserUuids = await res.json();
   const costomUsers = await res.json();
 
@@ -36,10 +36,12 @@ export async function getStaticPaths() {
     params: { user_uuid: costomUserUuid.toString() },
   }))
   */
-
+  
   const paths = costomUsers.map((costomUser) => ({
     params: { user_uuid: costomUser.uuid.toString() },
   }))
+  
+
   // 設定したパスのみ、ビルド時にプリレンダ
   // { fallback: false } は、他のルートが404になるという意味
   return { paths, fallback: false };

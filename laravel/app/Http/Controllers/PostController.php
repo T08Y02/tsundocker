@@ -11,14 +11,13 @@ use Illuminate\Support\Str;
 class PostController extends Controller
 {
     public function index(Post $post){
-        //dd(response()->json($post->get()->all()));
-        return response()->json($post->get()->all());
+        return response()->json($post->get());
     }
 
     public function ones_index(Post $post, $user_uuid){
-        //dd(response()->json($post->get()->all()));
         $selected_customuser = Customuser::where('uuid', '=', $user_uuid)->first();        
-        return response()->json($selected_customuser->posts()->get()->all());
+        //return response()->json($selected_customuser->posts()->get()->all());
+        return response()->json($selected_customuser->posts()->get());
     }
 
     public function show(Post $post, Customuser $customuser){

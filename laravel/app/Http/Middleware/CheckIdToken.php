@@ -46,8 +46,8 @@ class CheckIdToken
         }
 
         $id_token = $request->bearerToken();
-        Log::debug($id_token);
-        Log::debug(utf8_encode(base64_decode($id_token)));
+        //Log::debug($id_token);
+        //Log::debug(utf8_encode(base64_decode($id_token)));
 
         // IDトークンの検証・デコード
         try {

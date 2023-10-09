@@ -21,7 +21,7 @@ Route::post('/getLoginCustomuser', [CustomuserController::class, 'getLoginCustom
 Route::post('/uuid2Nickname', [CustomuserController::class, 'uuid2Nickname']);
 
 //レンダリング用のルーティングなのであとで保護をかける必要あり、これどうしたらいいんだろね？
-Route::get('/customUsers', [CustomuserController::class, 'getAllCustomuserUuid']);
+Route::get('/customUserUuids', [CustomuserController::class, 'getAllCustomuserUuid']);
 
 //post
 Route::get('/posts', [PostController::class, 'index']);
