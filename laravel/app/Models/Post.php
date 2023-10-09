@@ -11,6 +11,7 @@ class Post extends Model
     protected $fillable = [
         'title',
         'body', 
+        'uuid', 
         'progress', 
         'img_url',
         'customuser_id',
@@ -20,5 +21,10 @@ class Post extends Model
     public function customuser()
     {
         return $this->belongsTo(Customuser::class);
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'uuid';
     }
 }

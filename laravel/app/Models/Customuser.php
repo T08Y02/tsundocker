@@ -14,4 +14,8 @@ class Customuser extends Model
         'nickname',
         'uuid', 
     ];
+
+    public function posts(){
+        return $this->hasMany(Post::class);
+    }
 }

@@ -20,12 +20,17 @@ use App\Http\Controllers\CustomuserController;
 Route::post('/getLoginCustomuser', [CustomuserController::class, 'getLoginCustomuser'])->middleware("auth0_id");
 Route::post('/uuid2Nickname', [CustomuserController::class, 'uuid2Nickname']);
 
+//レンダリング用のルーティングなのであとで保護をかける必要あり、これどうしたらいいんだろね？
+Route::get('/customUserUuids', [CustomuserController::class, 'getAllCustomuserUuid']);
+
 //post
 Route::get('/posts', [PostController::class, 'index']);
 Route::post('/posts/create', [PostController::class, 'create'])->middleware("auth0_id");
 Route::put('/posts/{post}/edit', [PostController::class, 'edit'])->middleware("auth0_id");;
 Route::delete('/posts/{post}/delete', [PostController::class, 'delete'])->middleware("auth0_id");;
 Route::get('/posts/{post}', [PostController::class, 'show']);
+
+Route::get('/mypage/{user_uuid}/posts', [PostController::class, 'ones_index']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

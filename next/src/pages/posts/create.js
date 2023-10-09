@@ -68,7 +68,7 @@ function Create() {
         /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
         <Layout>
           <div className="p-10">
-            <div className="ml-10 p-10 w-1/2 bg-slate-400 rounded-lg">
+            <div className="ml-10 p-10 bg-white text-black rounded-lg">
             <form onSubmit={handleSubmit(onSubmit)} encType='multipart/form-data'>
                 <div className = 'p-5 w-1/2'>
                     <label htmlFor="first">Title:</label>

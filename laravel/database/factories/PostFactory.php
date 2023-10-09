@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Post>
@@ -34,6 +35,7 @@ class PostFactory extends Factory
             'body' => fake()->text($maxNbChars = 6),
             'progress' => rand(0, 100),
             'img_url' => fake()->randomElement($images),
+            'uuid' => Str::uuid(),
             'customuser_id' => '1', 
         ];
     }
