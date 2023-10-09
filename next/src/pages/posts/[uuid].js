@@ -1,4 +1,4 @@
-import {Link, Progress, Image, Button} from '@nextui-org/react'
+import {Link, Progress, Image, Button, Spinner} from '@nextui-org/react'
 import {useForm} from 'react-hook-form'
 import axios from "axios"
 import { useRouter } from "next/router";
@@ -22,7 +22,7 @@ function Post({ post_and_uuid }){
   const post = post_and_uuid.post;
   const creator_uuid = post_and_uuid.creator_uuid;
   const [loginUserNickname, setLoginUserNickname] = useState("username loading...");
-  const [creatorNickname, setCreatorNickname] = useState("username loading...");
+  const [creatorNickname, setCreatorNickname] = useState("creator loading...");
 
   const getCreatorUser = async () => {
     
@@ -87,7 +87,7 @@ function Post({ post_and_uuid }){
 
     const result = await window.confirm('本当に投稿を削除しますか？');
     if(result){
-      const res = await fetch(`http://localhost/api/posts/${encodeURIComponent(post.id)}/delete`, {
+      const res = await fetch(`http://localhost/api/posts/${encodeURIComponent(post.uuid)}/delete`, {
                 method: 'DELETE',
                 headers: {
                   Authorization: "Bearer " + token,
@@ -112,47 +112,60 @@ function Post({ post_and_uuid }){
     return (
       user && (<Layout>
         <div className="p-10">
-          <div className="ml-10 p-10 w-1/2 bg-slate-400 rounded-lg">
-            <div className="p-10">
-              <Image
-                        alt="Card background"
-                        className="object-cover rounded-xl"
-                        src={post.img_url}
-                        width={270}
-                        />
-            </div>
-            <div className="w-6/12 ml-10 p-5 bg-white rounded-lg">
-              <p className='text-black'>Title : {post.title}</p>
-            </div>
-            <div className="m-10 p-5 bg-white rounded-lg">
-              <p className='text-black'>Body : {post.body}</p>
-            </div>
-            <div className="w-6/12 m-10 p-5 bg-white rounded-lg">
-              <p className='text-black'>creator : {creatorNickname}</p>
-            </div>
-            <div className='p-10'>
-              <Progress max='100' min='0' value = {post.progress} showValueLabel={true}></Progress>
-            </div>
-            <div className="pl-10 pb-10">
-              {(loginUserNickname === creatorNickname) &&
-              <Button href={`/posts/${encodeURIComponent(post.id)}/edit`} as={Link} size='lg' color="primary"  variant="solid">
-                編集
-              </Button>
-              }
-            </div>
+          <div className="ml-10 p-10 w-full bg-white rounded-lg">
+            <div className="flex flex-row ">
+              <div className="p-10">
+                <Image
+                          alt="Card background"
+                          className="object-cover rounded-xl"
+                          src={post.img_url}
+                          width={1200}
+                          />
+              </div>
+              <div className="flex flex-col w-full">
+                <div className="pl-10 pt-10 pb-10">
+                  <Button href={`/mypage/${encodeURIComponent(creator_uuid)}/posts`} as={Link} color="primary" variant="faded">
+                    {creatorNickname}の他の投稿を見る
+                  </Button>
+                </div>
 
-            <div className="pl-10 pb-10">
-              <form onSubmit={handleSubmit(postDelete)}>
-                {(loginUserNickname === creatorNickname) &&
-                <Button type="submit" color="danger" variant="solid"> 削除</Button>
-                }
-              </form>
+                <div className="w-6/12 ml-10 p-5 bg-white rounded-lg bg-gray-200">
+                  <p className='text-black'>Title : {post.title}</p>
+                </div>
+                <div className="m-10 p-5 bg-white rounded-lg bg-gray-200">
+                  <p className='text-black'>Body : {post.body}</p>
+                </div>
+                <div className="w-6/12 m-10 p-5 bg-gray-200 rounded-lg">
+                  {(creatorNickname==="creator loading...")&&<Spinner/>}
+                  <p className='text-black'>creator : {creatorNickname}</p>
+                </div>
+                <div className='p-10 text-black'>
+                  <Progress max='100' min='0' value = {post.progress} showValueLabel={true}></Progress>
+                </div>
+                <div className="flex flex-row">
+                  <div className="pl-10 pb-10">
+                    {(loginUserNickname === creatorNickname) &&
+                    <Button href={`/posts/${encodeURIComponent(post.uuid)}/edit`} as={Link} size='lg' color="primary"  variant="solid">
+                      編集
+                    </Button>
+                    }
+                  </div>
+
+                  <div className="pl-10 pb-10">
+                    <form onSubmit={handleSubmit(postDelete)}>
+                      {(loginUserNickname === creatorNickname) &&
+                      <Button type="submit" color="danger" variant="solid" size='lg'> 削除</Button>
+                      }
+                    </form>
+                  </div>
+                </div>
+                <div className="pl-10 pb-10">
+                  <Button href="/posts" as={Link} color="primary" variant="faded">
+                    戻る
+                  </Button>
+                </div>
             </div>
-            <div className="pl-10 pb-10">
-              <Button href="/posts" as={Link} color="primary" variant="faded">
-                戻る
-              </Button>
-            </div>
+           </div>
           </div>
         </div>
       </Layout>
@@ -168,7 +181,7 @@ export async function getStaticPaths() {
   
     // 記事にもとづいてプリレンダするパスを取得
     const paths = posts.map((post) => ({
-      params: { id: post.id.toString() },
+      params: { uuid: post.uuid.toString() },
     }))
   
     // 設定したパスのみ、ビルド時にプリレンダ
@@ -182,7 +195,7 @@ export async function getStaticPaths() {
 
     // `params`は`id`の記事内容を含む
     // ルートが/posts/1とすると、params.idは1となる
-    const res = await fetch(`http://172.24.0.7/api/posts/${params.id}`);
+    const res = await fetch(`http://172.24.0.7/api/posts/${params.uuid}`);
     const post_and_uuid = await res.json();
     // propsを通じてpostをページに渡す
     return { props: { post_and_uuid} };

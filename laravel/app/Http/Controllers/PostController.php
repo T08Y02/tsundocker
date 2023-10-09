@@ -15,6 +15,12 @@ class PostController extends Controller
         return response()->json($post->get()->all());
     }
 
+    public function ones_index(Post $post, $user_uuid){
+        //dd(response()->json($post->get()->all()));
+        $selected_customuser = Customuser::where('uuid', '=', $user_uuid)->first();        
+        return response()->json($selected_customuser->posts()->get()->all());
+    }
+
     public function show(Post $post, Customuser $customuser){
         $customuser = $post->customuser()->first();
         return ["creator_uuid"=>$customuser->uuid,"post"=>$post];
@@ -41,6 +47,8 @@ class PostController extends Controller
             $image_url = Cloudinary::upload($request["image"]->getRealPath())->getSecurePath();
             $input["img_url"] = $image_url;
         }
+
+        $input['uuid'] = Str::uuid();
         
         $post->fill($input)->save();
         return response()->json($post->id);

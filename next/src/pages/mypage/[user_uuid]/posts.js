@@ -2,13 +2,14 @@ import {Link, Button, Card, CardHeader, CardBody, CardFooter, Divider, Progress,
 import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0/client';
 import React, { useEffect, useState } from "react";
 import {useAuth0} from "@auth0/auth0-react";
-import Layout from '../../../components/Layout';
+import Layout from '../../../../components/Layout';
 
 // この関数はビルド時に呼ばれる
-export async function getStaticProps() {
+export async function getStaticProps({ params }) {
     // 投稿記事を取得する外部APIエンドポイントをコール
-    const res = await fetch('http://172.24.0.7/api/posts');
+    const res = await fetch(`http://172.24.0.7/api/mypage/${params.user_uuid}/posts`);
     const posts = await res.json();
+    const creator_uuid = params.user_uuid;
     //const posts = res;
   
     // { props: posts }を返すことで、ビルド時にBlogコンポーネントが
@@ -16,17 +17,40 @@ export async function getStaticProps() {
     return {
       props: {
         posts,
+        creator_uuid,
       },
     }
   }
 
+  // この関数はビルド時に呼ばれる
+  //todo : user_subを全取得してレンダリングする必要あり
+export async function getStaticPaths() {
+  // 記事を取得する外部APIのエンドポイントをコール
+  const res = await fetch(`http://172.24.0.7/api/customUsers`);
+  //const costomUserUuids = await res.json();
+  const costomUsers = await res.json();
 
-  export default withPageAuthRequired(function Posts({ posts }) {
+  // 記事にもとづいてプリレンダするパスを取得
+  /*
+  const paths = costomUserUuids.map((costomUserUuid) => ({
+    params: { user_uuid: costomUserUuid.toString() },
+  }))
+  */
+
+  const paths = costomUsers.map((costomUser) => ({
+    params: { user_uuid: costomUser.uuid.toString() },
+  }))
+  // 設定したパスのみ、ビルド時にプリレンダ
+  // { fallback: false } は、他のルートが404になるという意味
+  return { paths, fallback: false };
+}
+
+
+export default withPageAuthRequired(function Posts({ posts, creator_uuid}) {
   const { user, error, isLoading } = useUser();
   const {getAccessTokenSilently, isAuthenticated} = useAuth0();
   const [loginUserNickname, setLoginUserNickname] = useState("username loading...");
-  const [loginUserUuid, setLoginUserUuid] = useState("username loading...");
-
+  const [creatorNickname, setCreatorNickname] = useState("creator loading...");
 
   const getLoginuser = async () => {
     const token = await getAccessTokenSilently({
@@ -52,7 +76,6 @@ export async function getStaticProps() {
     //console.log(customuser['nickname']);
     if (typeof customuser['nickname'] !== "undefined"){
       setLoginUserNickname(customuser['nickname']);
-      setLoginUserUuid(customuser['uuid']);
     }
     else{
       setLoginUserNickname(customuser);
@@ -62,23 +85,40 @@ export async function getStaticProps() {
     //console.log(customuserNickname);
   }
 
+  const getCreatorUser = async () => {
+    
+    const creator_res = await fetch('http://localhost/api/uuid2Nickname', {
+              method: 'POST',
+              mode: 'cors',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              //body: JSON.stringify({ data }),
+              body : JSON.stringify({
+                "user_uuid" : creator_uuid,
+              }), 
+    });
+    const creator_nickname = await creator_res.json();
+
+    setCreatorNickname(creator_nickname);
+    //console.log(customuserNickname);
+  }
+
+
   getLoginuser();
+  getCreatorUser();
 
   return(
     user && (
       <div>
         <Layout>
+            <div>{creatorNickname}　さんの本棚</div>
             <div className="mt-5 mb-5">
               {(loginUserNickname==="username loading...")&&<Spinner/>}
               <div className="flex flex-row">
                 <p>{loginUserNickname}</p>
                 {(loginUserNickname!=="username loading...")&&<p>　でログインしています</p>}
               </div>
-            </div>
-            <div className="pb-10">
-              <Button href={`/mypage/${encodeURIComponent(loginUserUuid)}/posts`} as={Link} color="primary"  variant="solid">
-              自分の投稿一覧に移動
-              </Button>
             </div>
             <div className="pb-10">
               <Button href="/posts/create" as={Link} color="primary"  variant="solid">
@@ -111,7 +151,13 @@ export async function getStaticProps() {
                     </CardFooter>
                   </Card>
                 </div>
+                
             ))}
+            </div>
+            <div className="pl-10 pt-10 pb-10">
+                  <Button href="/posts" as={Link} color="primary" variant="faded">
+                    戻る
+                  </Button>
             </div>
         </Layout>
       </div>

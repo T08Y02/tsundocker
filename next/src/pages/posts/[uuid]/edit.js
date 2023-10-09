@@ -2,7 +2,7 @@ import {useForm} from 'react-hook-form'
 import axios from "axios"
 import { useRouter } from "next/router";
 import { useState } from 'react';
-import {Link, Input, Button, Textarea} from '@nextui-org/react'
+import {Link, Input, Button, Textarea, Image} from '@nextui-org/react'
 import { useAuth0 } from "@auth0/auth0-react";
 import Layout from '../../../../components/Layout';
 
@@ -48,7 +48,7 @@ function Edit({ post_and_uuid }){
             console.log(value); 
           }
           console.log("token:", token); 
-          const res = await fetch(`http://localhost/api/posts/${post.id}/edit`, {
+          const res = await fetch(`http://localhost/api/posts/${post.uuid}/edit`, {
           //実質的にはPUTなのだが、PUTだとbodyが送れないのでここの記載はPOSTにしている。
           //formdataの_methodをPUTにしておけばPUTリクエストが送信できているらしく、api側のルーティングもPUTで処理できている
               method: 'POST',
@@ -75,42 +75,52 @@ function Edit({ post_and_uuid }){
       return (
         <Layout>
           <div className="p-10">
-            <div className="ml-10 p-10 w-1/2 bg-slate-400 rounded-lg">
-            <form onSubmit={handleSubmit(onSubmit)} encType='multipart/form-data'>
-                <div className = 'p-5 w-1/2'>
-                    <label htmlFor="first">Title:</label>
-                    <Input type="text" size={`lg`} color="primary" isRequired defaultValue={post.title} {...register("title")} />
+            <div className="ml-10 p-10 bg-white text-black rounded-lg">
+              <div className="flex flex-row ">
+                <div className="p-10">
+                    <Image
+                              alt="Card background"
+                              className="object-cover rounded-xl"
+                              src={post.img_url}
+                              width={1200}
+                              />
                 </div>
-              
-                <div className = 'p-5'>
-                    <label htmlFor="last">Body:</label>
-                    <Textarea type="textarea" size={`lg`} clearButton color="primary" isRequired defaultValue={post.body} {...register("body")}/>
-                </div>
-                <div className = 'p-5'>
-                  <output id="output1">{progress.percentage}</output>
-                  <Input type="range"  value={progress.percentage} name="progress" min="0" max="100" step="1"  onInput={(e) => changeProgress(e)} {...register("progress")} />
-                </div>
-                <div className = 'p-5'>
-                  <Input
-                  color="primary"
-                  type="file"
-                  accept="image/*"
-                  {...register("image")}/>
-                </div>
-              
-                <div className = 'input_submit p-5'>
-                    <Button type="submit" color="primary" variant="solid" size='lg'>
-                      投稿編集
-                    </Button>
-                </div>
-                <div className="p-5">
-                  <div className = 'back'>
-                      <Button href="/posts" as={Link} color="primary" variant="faded">
-                        戻る
-                      </Button>
-                  </div>
-                </div>
-            </form>
+                <form onSubmit={handleSubmit(onSubmit)} encType='multipart/form-data' className=" w-full">
+                    <div className = 'p-5'>
+                        <label htmlFor="first">Title:</label>
+                        <Input type="text" size={`lg`} color="primary" isRequired defaultValue={post.title} {...register("title")} />
+                    </div>
+                  
+                    <div className = 'p-5'>
+                        <label htmlFor="last">Body:</label>
+                        <Textarea type="textarea" size={`lg`} clearButton color="primary" isRequired defaultValue={post.body} {...register("body")}/>
+                    </div>
+                    <div className = 'p-5 text-black'>
+                      <output id="output1">{progress.percentage}</output>
+                      <Input type="range"  value={progress.percentage} name="progress" min="0" max="100" step="1"  onInput={(e) => changeProgress(e)} {...register("progress")} />
+                    </div>
+                    <div className = 'p-5'>
+                      <Input
+                      color="primary"
+                      type="file"
+                      accept="image/*"
+                      {...register("image")}/>
+                    </div>
+                  
+                    <div className = 'input_submit p-5'>
+                        <Button type="submit" color="primary" variant="solid" size='lg'>
+                          投稿編集
+                        </Button>
+                    </div>
+                    <div className="p-5">
+                      <div className = 'back'>
+                          <Button href="/posts" as={Link} color="primary" variant="faded">
+                            戻る
+                          </Button>
+                      </div>
+                    </div>
+                </form>
+              </div>
             </div>
           </div>
         </Layout>
@@ -127,7 +137,7 @@ export async function getStaticPaths() {
   
     // 記事にもとづいてプリレンダするパスを取得
     const paths = posts.map((post) => ({
-      params: { id: post.id.toString() },
+      params: { uuid: post.uuid.toString() },
     }))
   
     // 設定したパスのみ、ビルド時にプリレンダ
@@ -140,7 +150,7 @@ export async function getStaticPaths() {
   export async function getStaticProps({ params }) {
     // `params`は`id`の記事内容を含む
     // ルートが/posts/1とすると、params.idは1となる
-    const res = await fetch(`http://172.24.0.7/api/posts/${params.id}`);
+    const res = await fetch(`http://172.24.0.7/api/posts/${params.uuid}`);
     const post_and_uuid = await res.json();
     //const post = {"title":"happy", "body" : "lucky"}
   
